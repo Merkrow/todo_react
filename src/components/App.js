@@ -5,7 +5,7 @@ import Filter from './Filter';
 class App extends Component {
     constructor(props) {
     	super(props);
-    	this.state = { value: '', items: [], filter: "all" };
+    	this.state = { value: '', items: [], filter: "all", correct: "" };
 	}
 
 	handleOnChange(e) {
@@ -13,8 +13,25 @@ class App extends Component {
     	this.setState({ value: e.target.value });
 	}
 
+	handleCorrectChange(e) {
+		e.preventDefault();
+		this.setState({ correct: e.target.value });
+	}
+
+	handleOnCorrect(e, id) {
+		e.preventDefault();
+		const oldItems = this.state.items.slice();
+		const items = oldItems.map(item => {
+			if(item.id === id) {
+				item.correct = false;
+				item.value = this.state.correct;
+			}
+		})
+		this.setState({ oldItems, correct: "" });
+	}
+
 	handleOnRemove(id) {
-	    const oldItems = this.state.items;
+	    const oldItems = this.state.items.slice();
 	    const items = oldItems.filter(item => item.id !== id );
 
 	    this.setState({ items });
@@ -24,14 +41,27 @@ class App extends Component {
 	    e.preventDefault();
 	    if(this.state.value !== "") {
 		    const items = this.state.items.slice();
-		    const item = { id: +new Date, value: this.state.value, check: false };
+		    const item = { id: +new Date, value: this.state.value, check: false, correct: false };
 		    items.push(item);
 		    this.setState({ value: "", items});
 	    }
 	}
 
+handleOnDouble(id) {
+	const oldItems = this.state.items.slice();
+	const items = oldItems.map(item => {
+		if(item.id === id) {
+			item.correct = !item.correct;
+			this.setState({ correct: item.value })
+		}
+		return item;
+	});
+
+	this.setState({ items });
+}
+
 handleOnDone(id) {
-  	const oldItems = this.state.items;
+  	const oldItems = this.state.items.slice();
   	const items = oldItems.map(item => {
   		if(item.id === id) {
   			item.check = !item.check;
@@ -41,6 +71,7 @@ handleOnDone(id) {
 	
 	this.setState({ items });
 }
+
 
 all() {
 	this.setState({
@@ -86,10 +117,20 @@ finished() {
 
 		        <div className="items">
 		          {items.map(item => {
+		          	if(!item.correct) {
 		            return <Item key={item.id} item={item} check={false}
 		              onDone={id => this.handleOnDone(id)}
-		              onRemove={id => this.handleOnRemove(id)} />;
+		              onRemove={id => this.handleOnRemove(id)}
+		              onDouble={id => this.handleOnDouble(id)}/>;
 		            }
+		            return (<form action="">
+		            	<input className="t" type="text" value={this.state.correct}
+		            	  onChange={e => this.handleCorrectChange(e)} />
+		            	<input className="s" type="submit"
+		            	  onClick={(e) => this.handleOnCorrect(e, item.id)} />
+		            	</form>
+		            	)
+		        }
 		          )}
 		        </div>
 		        <Filter 

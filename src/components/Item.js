@@ -9,13 +9,17 @@ class Item extends Component {
 	  	this.props.onDone(this.props.item.id);
 	}
 
+	handleDoubleClick() {
+		this.props.onDouble(this.props.item.id);
+	}
+
 	render() {
 	    return (<div style={{ 
 	      		textDecoration: 
 	      		this.props.item.check ?
 	                'line-through' : 'none'
 	      	}}>
-	    {this.props.item.value}
+	    <span onDoubleClick={() => this.handleDoubleClick()}>{this.props.item.value}</span>
 	    <input type="button" className="remove" value="remove"
 	        onClick={() => this.handleOnRemove()} />
 	    <input type="checkbox" className="done"
