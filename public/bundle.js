@@ -20507,7 +20507,7 @@ var App = function (_Component) {
 
 		var _this = _possibleConstructorReturn(this, (App.__proto__ || Object.getPrototypeOf(App)).call(this, props));
 
-		_this.state = { value: '', items: [], filter: "all" };
+		_this.state = { value: '', items: [], filter: "all", correct: "" };
 		return _this;
 	}
 
@@ -20518,9 +20518,30 @@ var App = function (_Component) {
 			this.setState({ value: e.target.value });
 		}
 	}, {
+		key: 'handleCorrectChange',
+		value: function handleCorrectChange(e) {
+			e.preventDefault();
+			this.setState({ correct: e.target.value });
+		}
+	}, {
+		key: 'handleOnCorrect',
+		value: function handleOnCorrect(e, id) {
+			var _this2 = this;
+
+			e.preventDefault();
+			var oldItems = this.state.items.slice();
+			var items = oldItems.map(function (item) {
+				if (item.id === id) {
+					item.correct = false;
+					item.value = _this2.state.correct;
+				}
+			});
+			this.setState({ oldItems: oldItems, correct: "" });
+		}
+	}, {
 		key: 'handleOnRemove',
 		value: function handleOnRemove(id) {
-			var oldItems = this.state.items;
+			var oldItems = this.state.items.slice();
 			var items = oldItems.filter(function (item) {
 				return item.id !== id;
 			});
@@ -20533,15 +20554,31 @@ var App = function (_Component) {
 			e.preventDefault();
 			if (this.state.value !== "") {
 				var items = this.state.items.slice();
-				var item = { id: +new Date(), value: this.state.value, check: false };
+				var item = { id: +new Date(), value: this.state.value, check: false, correct: false };
 				items.push(item);
 				this.setState({ value: "", items: items });
 			}
 		}
 	}, {
+		key: 'handleOnDouble',
+		value: function handleOnDouble(id) {
+			var _this3 = this;
+
+			var oldItems = this.state.items.slice();
+			var items = oldItems.map(function (item) {
+				if (item.id === id) {
+					item.correct = !item.correct;
+					_this3.setState({ correct: item.value });
+				}
+				return item;
+			});
+
+			this.setState({ items: items });
+		}
+	}, {
 		key: 'handleOnDone',
 		value: function handleOnDone(id) {
-			var oldItems = this.state.items;
+			var oldItems = this.state.items.slice();
 			var items = oldItems.map(function (item) {
 				if (item.id === id) {
 					item.check = !item.check;
@@ -20575,7 +20612,7 @@ var App = function (_Component) {
 	}, {
 		key: 'render',
 		value: function render() {
-			var _this2 = this;
+			var _this4 = this;
 
 			var value = this.state.value;
 			var filter = this.state.filter;
@@ -20603,35 +20640,52 @@ var App = function (_Component) {
 					{ action: '' },
 					_react2.default.createElement('input', { className: 'text', type: 'text', value: value,
 						onChange: function onChange(e) {
-							return _this2.handleOnChange(e);
+							return _this4.handleOnChange(e);
 						} }),
 					_react2.default.createElement('input', { className: 'submit', type: 'submit',
 						onClick: function onClick(e) {
-							return _this2.handleOnClick(e);
+							return _this4.handleOnClick(e);
 						} })
 				),
 				_react2.default.createElement(
 					'div',
 					{ className: 'items' },
 					items.map(function (item) {
-						return _react2.default.createElement(_Item2.default, { key: item.id, item: item, check: false,
-							onDone: function onDone(id) {
-								return _this2.handleOnDone(id);
-							},
-							onRemove: function onRemove(id) {
-								return _this2.handleOnRemove(id);
-							} });
+						if (!item.correct) {
+							return _react2.default.createElement(_Item2.default, { key: item.id, item: item, check: false,
+								onDone: function onDone(id) {
+									return _this4.handleOnDone(id);
+								},
+								onRemove: function onRemove(id) {
+									return _this4.handleOnRemove(id);
+								},
+								onDouble: function onDouble(id) {
+									return _this4.handleOnDouble(id);
+								} });
+						}
+						return _react2.default.createElement(
+							'form',
+							{ action: '' },
+							_react2.default.createElement('input', { className: 't', type: 'text', value: _this4.state.correct,
+								onChange: function onChange(e) {
+									return _this4.handleCorrectChange(e);
+								} }),
+							_react2.default.createElement('input', { className: 's', type: 'submit',
+								onClick: function onClick(e) {
+									return _this4.handleOnCorrect(e, item.id);
+								} })
+						);
 					})
 				),
 				_react2.default.createElement(_Filter2.default, {
 					all: function all() {
-						return _this2.all();
+						return _this4.all();
 					},
 					active: function active() {
-						return _this2.active();
+						return _this4.active();
 					},
 					finished: function finished() {
-						return _this2.finished();
+						return _this4.finished();
 					}
 				})
 			);
@@ -20767,6 +20821,11 @@ var Item = function (_Component) {
 			this.props.onDone(this.props.item.id);
 		}
 	}, {
+		key: 'handleDoubleClick',
+		value: function handleDoubleClick() {
+			this.props.onDouble(this.props.item.id);
+		}
+	}, {
 		key: 'render',
 		value: function render() {
 			var _this2 = this;
@@ -20776,7 +20835,13 @@ var Item = function (_Component) {
 				{ style: {
 						textDecoration: this.props.item.check ? 'line-through' : 'none'
 					} },
-				this.props.item.value,
+				_react2.default.createElement(
+					'span',
+					{ onDoubleClick: function onDoubleClick() {
+							return _this2.handleDoubleClick();
+						} },
+					this.props.item.value
+				),
 				_react2.default.createElement('input', { type: 'button', className: 'remove', value: 'remove',
 					onClick: function onClick() {
 						return _this2.handleOnRemove();
