@@ -131,8 +131,7 @@ finished() {
 		            }
 		            return (<form action="">
 		            	<input className="t" type="text" value={item.value}
-		            	  onChange={e => this.handleCorrectChange(e, item.id) />
-		            	}
+		            	  onChange={e => this.handleCorrectChange(e, item.id)} />
 		            	<input className="s" type="submit"
 		            	  onClick={(e) => this.handleOnCorrect(e, item.id)} />
 		            	</form>
