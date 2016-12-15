@@ -5,7 +5,7 @@ import Filter from './Filter';
 class App extends Component {
     constructor(props) {
     	super(props);
-    	this.state = { value: '', items: [], filter: "all", correct: "" };
+    	this.state = { value: '', items: [], filter: "all" };
 	}
 
 	handleOnChange(e) {
@@ -13,9 +13,16 @@ class App extends Component {
     	this.setState({ value: e.target.value });
 	}
 
-	handleCorrectChange(e) {
+	handleCorrectChange(e, id) {
 		e.preventDefault();
-		this.setState({ correct: e.target.value });
+		const oldItems = this.state.items.slice();
+		const items = oldItems.map(item => {
+			if(item.id === id) {
+				item.value = e.target.value;
+			}
+			return item;
+		})
+		this.setState({ items });
 	}
 
 	handleOnCorrect(e, id) {
@@ -24,7 +31,6 @@ class App extends Component {
 		const items = oldItems.map(item => {
 			if(item.id === id) {
 				item.correct = false;
-				item.value = this.state.correct;
 			}
 		})
 		this.setState({ oldItems, correct: "" });
@@ -124,8 +130,9 @@ finished() {
 		              onDouble={id => this.handleOnDouble(id)}/>;
 		            }
 		            return (<form action="">
-		            	<input className="t" type="text" value={this.state.correct}
-		            	  onChange={e => this.handleCorrectChange(e)} />
+		            	<input className="t" type="text" value={item.value}
+		            	  onChange={e => this.handleCorrectChange(e, item.id) />
+		            	}
 		            	<input className="s" type="submit"
 		            	  onClick={(e) => this.handleOnCorrect(e, item.id)} />
 		            	</form>
